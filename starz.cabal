@@ -20,6 +20,7 @@ executable starz
                      , resourcet
                      , scotty
                      , text
+                     , aeson
                      , bytestring
                      , blaze-html
                      , persistent ==1.3.*
