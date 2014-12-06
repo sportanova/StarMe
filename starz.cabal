@@ -18,6 +18,8 @@ executable starz
                      , warp
                      , http-types
                      , resourcet
+                     , HTTP
+                     , network
                      , scotty
                      , text
                      , aeson
