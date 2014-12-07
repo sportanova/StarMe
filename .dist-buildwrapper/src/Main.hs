@@ -11,7 +11,7 @@ main = scotty 3000 $ do
     json s
   get "/auth_cb" $ do
     code <- param "code"
-    r <- liftIO (doStuff code)
+    r <- liftIO (execPostReq code)
     json r
   get "/hello" $ do
     name <- param "name"

@@ -19,6 +19,7 @@ executable starz
                      , http-types
                      , resourcet
                      , HTTP
+                     , http-conduit ==2.1.5
                      , network
                      , scotty
                      , text

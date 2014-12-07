@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Http.Github where
 
 import Web.Scotty
@@ -5,6 +6,8 @@ import Data.Aeson.Types
 import qualified Data.Text as T
 import Network.HTTP
 import Network.URI
+import Network.HTTP.Conduit
+import qualified Data.ByteString.Lazy as L
 
 auth :: Coord
 auth = Coord {x = 1, y = 2}
@@ -22,23 +25,18 @@ doStuff code = do
   putStrLn $ T.unpack code
   return Print {thing = T.unpack code}
 
--- createAuthPostURL :: String -> String -> String -> String -> String
--- createAuthPostURL clientId clientSecret code redirectURI = "https://github.com/login/oauth/access_token" ++ clientId 
-  
-createPostReq :: String -> T.Text -> Request String
-createPostReq url qParam = req where
-  uri = URI {uriPath = url}
-  rqMethod = POST
-  req = Request {rqURI = uri, rqMethod = rqMethod, rqHeaders = []}
+createAuthPostURL :: T.Text -> String
+createAuthPostURL code = "https://github.com/login/oauth/access_token?client_id=99c89395ab6f347787e8&client_secret=74c2b3119b1a0aa39a8482dc116ada1c870ea80f&code=" ++ T.unpack code ++ "&redirect_uri=http://localhost:3000/auth_cb" 
 
-execPostReq :: String -> T.Text -> IO Print
-execPostReq url qParam = do
-  rsp <- simpleHTTP (createPostReq url qParam)
-  r <- (getResponseBody rsp)
-  putStrLn r
-  return Print {thing = r}
+execPostReq :: T.Text -> IO()
+execPostReq param = do
+  initReq <- parseUrl $ createAuthPostURL param
+  let req' = initReq { secure = True, method = "POST" } -- Turn on https
+  let req = urlEncodedBody [("?nonce:", "2"), ("&method", "getInfo")] req'
+  response <- withManager $ httpLbs req
+  L.putStr $ responseBody response
+  -- return Print {thing = responseBody response}
 
-  -- r <- fmap (take 100) (getResponseBody rsp)
 data Coord = Coord { x :: Double, y :: Double }
 
 data Print = Print {thing :: String}
