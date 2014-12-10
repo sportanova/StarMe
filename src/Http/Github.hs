@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, DataKinds #-}
 module Http.Github where
 
 import Web.Scotty
@@ -11,6 +11,7 @@ import Network.HTTP.Conduit
 import qualified Data.ByteString.Lazy as L
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad (mzero)
+import Cassandra
 
 auth :: Coord
 auth = Coord {x = 1, y = 2}
@@ -22,8 +23,6 @@ stuff = do
   r <- (getResponseBody rsp)
   putStrLn r
   return auth
-  
-
   
 -- PUT /user/starred/:owner/:repo
 starRepo :: String -> String -> String -> IO (String)

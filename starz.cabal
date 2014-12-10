@@ -17,6 +17,8 @@ executable starz
                      , wai
                      , warp
                      , cassandra-cql ==0.4.0.1
+                     , uuid ==1.3.5
+                     , random ==1.0.1.1
                      , http-types
                      , resourcet
                      , HTTP
@@ -36,4 +38,6 @@ executable starz
                      , wai-middleware-static
                      , wai-extra
                      , time
-  other-modules:       Http.Github
+  other-modules:       
+                       Http.Github,
+                       Cassandra

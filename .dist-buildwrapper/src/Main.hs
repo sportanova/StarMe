@@ -1,9 +1,20 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, DataKinds #-}
 import Web.Scotty
 import Http.Github
 import Control.Monad.IO.Class(liftIO)
+import Database.Cassandra.CQL
+import Cassandra
+import Data.UUID
+import System.Random
 
 main = scotty 3000 $ do
+  pool <- liftIO initCass
+  result <- liftIO $ runCas pool $ do
+    executeSchema ANY createSongs ()
+
+    u1 <- liftIO randomIO
+    executeWrite ANY insertSong (u1, "La Grange", "ZZ Top", False, 2, Nothing)
+    
   get "/wat" $ do
     html "wat!"
   get "/who" $ do
