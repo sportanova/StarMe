@@ -16,3 +16,6 @@ main = scotty 3000 $ do
   get "/hello" $ do
     name <- param "name"
     text name
+  get "/star" $ do
+    r <- liftIO (starRepo "dinomiike" "pics" "1de5631b352399fdb00f705e9f222729814a0d7f")
+    json r

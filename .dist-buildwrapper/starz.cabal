@@ -16,6 +16,7 @@ executable starz
   build-depends:       base ==4.7.0.1
                      , wai
                      , warp
+                     , cassandra-cql ==0.4.0.1
                      , http-types
                      , resourcet
                      , HTTP
