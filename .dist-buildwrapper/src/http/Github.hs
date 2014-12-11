@@ -9,6 +9,7 @@ import Network.HTTP
 import Network.URI
 import Network.HTTP.Conduit
 import qualified Data.ByteString.Lazy as L
+import qualified Data.ByteString.Char8 as C
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad (mzero)
 import Cassandra
@@ -30,15 +31,15 @@ starRepo owner repo accessToken = do
   initReq <- parseUrl $ "https://api.github.com/user/starred/dinomiike/pics?access_token=1de5631b352399fdb00f705e9f222729814a0d7f"
   let req = initReq { secure = True, method = "PUT", requestHeaders = [("Accept", "application/vnd.github.v3+json"), ("User-Agent", "StarMe")] } -- Turn on https
   response <- withManager $ httpLbs req
-  x <- return (responseHeaders response) -- TODO: evaluate header for 204 success code
+  headers <- return (responseHeaders response) -- TODO: evaluate header for 204 success code
   return ""
   --return (decode (responseBody response))
 
 createAuthPostURL :: T.Text -> String
 createAuthPostURL code = "https://github.com/login/oauth/access_token?client_id=99c89395ab6f347787e8&client_secret=74c2b3119b1a0aa39a8482dc116ada1c870ea80f&code=" ++ T.unpack code ++ "&redirect_uri=http://localhost:3000/auth_cb" 
 
-execPostReq :: T.Text -> IO (Maybe AccessTokenJSON)
-execPostReq param = do
+getAccessToken :: T.Text -> IO (Maybe AccessToken)
+getAccessToken param = do
   initReq <- parseUrl $ createAuthPostURL param
   let req' = initReq { secure = True, method = "POST", requestHeaders = [("Accept", "application/json")] } -- Turn on https
   let req = urlEncodedBody [("?nonce:", "2"), ("&method", "getInfo")] req'
@@ -46,18 +47,42 @@ execPostReq param = do
   L.putStr $ responseBody response
   return (decode (responseBody response))
 
+getUserInfo :: String -> IO (Maybe User)
+getUserInfo accessToken = do
+  initReq <- parseUrl $ "https://api.github.com/user"
+  let req = initReq { secure = True, method = "GET", requestHeaders = [("Authorization", C.pack("Bearer " ++ accessToken)), ("User-Agent", "StarMe")] } -- Turn on https
+  response <- withManager $ httpLbs req
+  return (decode (responseBody response))
+
 data Coord = Coord { x :: Double, y :: Double }
 
-data AccessTokenJSON = AccessTokenJSON { accessToken :: String,
-                                         tokenType :: String,
-                                         scope :: String
-                                       } deriving Show
+data User = User {
+                   username :: String,
+                   id :: Int,
+                   url :: String,
+                   name :: String
+                 }
 
-instance ToJSON AccessTokenJSON where
-  toJSON (AccessTokenJSON accessToken tokenType scope) = object [T.pack "accessToken" .= accessToken, T.pack "tokenType" .= tokenType, T.pack "scope" .= scope]
+instance ToJSON User where
+  toJSON (User username id url name) = object [T.pack "username" .= username, T.pack "id" .= id, T.pack "url" .= url, T.pack "name" .= name]
+
+instance FromJSON User where
+  parseJSON (Object v) = User <$>
+                         v .: "login" <*>
+                         v .: "id" <*>
+                         v .: "url" <*>
+                         v .: "name"
+
+data AccessToken = AccessToken { accessToken :: String,
+                                 tokenType :: String,
+                                 scope :: String
+                               } deriving Show
+
+instance ToJSON AccessToken where
+  toJSON (AccessToken accessToken tokenType scope) = object [T.pack "accessToken" .= accessToken, T.pack "tokenType" .= tokenType, T.pack "scope" .= scope]
   
-instance FromJSON AccessTokenJSON where
-  parseJSON (Object v) = AccessTokenJSON <$>
+instance FromJSON AccessToken where
+  parseJSON (Object v) = AccessToken <$>
                          v .: "access_token" <*>
                          v .: "token_type" <*>
                          v .: "scope"
