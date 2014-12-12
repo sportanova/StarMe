@@ -40,4 +40,5 @@ executable starz
                      , time
   other-modules:       
                        Http.Github,
-                       Cassandra
+                       Cassandra,
+                       Models

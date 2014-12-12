@@ -12,12 +12,9 @@ main = scotty 3000 $ do
     
   get "/wat" $ do
     html "wat!"
-  get "/who" $ do
-    s <- liftIO stuff
-    json s
   get "/auth_cb" $ do
     code <- param "code"
-    r <- liftIO (createNewUser code)
+    r <- liftIO (createNewUser pool code)
     json r
   get "/hello" $ do
     name <- param "name"
