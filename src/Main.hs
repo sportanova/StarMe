@@ -17,7 +17,7 @@ main = scotty 3000 $ do
     json s
   get "/auth_cb" $ do
     code <- param "code"
-    r <- liftIO (getAccessToken code)
+    r <- liftIO (createNewUser code)
     json r
   get "/hello" $ do
     name <- param "name"

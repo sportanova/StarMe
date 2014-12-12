@@ -38,16 +38,19 @@ starRepo owner repo accessToken = do
   --return (decode (responseBody response))
 
 createAuthPostURL :: T.Text -> String
-createAuthPostURL code = "https://github.com/login/oauth/access_token?client_id=99c89395ab6f347787e8&client_secret=74c2b3119b1a0aa39a8482dc116ada1c870ea80f&code=" ++ T.unpack code ++ "&redirect_uri=http://localhost:3000/auth_cb" 
+createAuthPostURL code = "https://github.com/login/oauth/access_token?client_id=99c89395ab6f347787e8&client_secret=74c2b3119b1a0aa39a8482dc116ada1c870ea80f&code=" ++ T.unpack code ++ "&redirect_uri=http://localhost:3000/auth_cb"
 
-getAccessToken :: T.Text -> IO (Maybe User)
+createNewUser :: T.Text -> IO (Maybe User)
+createNewUser code = getAccessToken code >>= (\x -> getUserInfo x)
+
+getAccessToken :: T.Text -> IO (Maybe AccessToken)
 getAccessToken param = do
   initReq <- parseUrl $ createAuthPostURL param
   let req' = initReq { secure = True, method = "POST", requestHeaders = [("Accept", "application/json")] } -- Turn on https
   let req = urlEncodedBody [("?nonce:", "2"), ("&method", "getInfo")] req'
   response <- withManager $ httpLbs req
   L.putStr $ responseBody response
-  getUserInfo $ decode (responseBody response)
+  return $ decode (responseBody response)
 
 getUserInfo :: Maybe AccessToken -> IO (Maybe User)
 getUserInfo (Just at) = do

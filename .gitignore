@@ -15,6 +15,7 @@ cabal-install/tests/PackageTests/*/dist/
 cabal.config
 dist-sandbox
 dist
+.dist-buildwrapper
 
 # editor temp files
 
