@@ -32,9 +32,9 @@ createAuthPostURL :: T.Text -> String
 createAuthPostURL code = "https://github.com/login/oauth/access_token?client_id=99c89395ab6f347787e8&client_secret=74c2b3119b1a0aa39a8482dc116ada1c870ea80f&code=" ++ T.unpack code ++ "&redirect_uri=http://localhost:3000/auth_cb"
 
 createNewUser :: Pool -> T.Text -> IO (Maybe User)
-createNewUser pool code = getAccessToken code >>= (\x -> getUserInfo x) >>= (\y -> case y of Nothing -> return Nothing -- TODO: error handling
-                                                                                             Just user -> return (Just user)
-                                                                            )
+createNewUser pool code = getAccessToken code >>= (\at -> (getUserInfo at) >>= (\u -> insertUser pool u
+                                                                               )
+                                                  )
 
 getAccessToken :: T.Text -> IO (Maybe AccessToken)
 getAccessToken param = do
