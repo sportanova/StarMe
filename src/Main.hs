@@ -6,14 +6,16 @@ import Database.Cassandra.CQL
 import Cassandra
 import Data.UUID
 import System.Random
-import Network.Wai.Middleware.Static (addBase, noDots, staticPolicy, (>->))
+import Network.Wai.Middleware.Static
 
 
 main = scotty 3000 $ do
   pool <- liftIO initCass
-    
+  middleware $ staticPolicy (noDots >-> addBase "static")
+
+  get "/" $ file "index.html"
   get "/wat" $ do
-    html "wat!"
+    html "NOW!"
   get "/auth_cb" $ do
     code <- param "code"
     r <- liftIO (createNewUser pool code)
@@ -24,3 +26,4 @@ main = scotty 3000 $ do
   get "/star" $ do
     r <- liftIO (starRepo "dinomiike" "pics" "1de5631b352399fdb00f705e9f222729814a0d7f")
     json r
+  get "/404" $ file "404.html"

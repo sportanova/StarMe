@@ -25,13 +25,11 @@ executable starz
                      , http-conduit ==2.1.5
                      , network
                      , scotty
+                     , scotty-tls
                      , text
                      , aeson
                      , bytestring
                      , blaze-html
-                     , persistent ==1.3.*
-                     , persistent-template ==1.3.*
-                     , persistent-sqlite ==1.3.*
                      , monad-logger ==0.3.10
                      , heroku
                      , transformers
