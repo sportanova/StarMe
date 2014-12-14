@@ -27,8 +27,18 @@ starRepo owner repo accessToken = do
   headers <- return (responseHeaders response) -- TODO: evaluate header for 204 success code
   return ""
 
+getRepos :: String -> IO (Maybe [Repo])
+getRepos username = do
+  initReq <- parseUrl $ createRepoListURL username
+  let req = initReq { secure = True, method = "GET", requestHeaders = [("Accept", "application/vnd.github.v3+json"), ("User-Agent", "StarMe")] } -- Turn on https
+  response <- withManager $ httpLbs req
+  return $ decode (responseBody response)
+
 createAuthPostURL :: T.Text -> String
 createAuthPostURL code = "https://github.com/login/oauth/access_token?client_id=99c89395ab6f347787e8&client_secret=74c2b3119b1a0aa39a8482dc116ada1c870ea80f&code=" ++ T.unpack code ++ "&redirect_uri=http://localhost:3000/auth_cb"
+
+createRepoListURL :: String -> String
+createRepoListURL username = "https://api.github.com/users/" ++ username ++ "/repos"
 
 createNewUser :: Pool -> T.Text -> IO (Maybe User)
 createNewUser pool code = getAccessToken code >>= (\at -> (getUserInfo at) >>= (\u -> insertUser pool u
