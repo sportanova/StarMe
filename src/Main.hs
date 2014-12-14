@@ -6,6 +6,8 @@ import Database.Cassandra.CQL
 import Cassandra
 import Data.UUID
 import System.Random
+import Network.Wai.Middleware.Static (addBase, noDots, staticPolicy, (>->))
+
 
 main = scotty 3000 $ do
   pool <- liftIO initCass
