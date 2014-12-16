@@ -62,11 +62,11 @@ getAccessToken param = do
 getUserInfo :: Maybe AccessToken -> IO (Maybe User)
 getUserInfo (Just at) = do
   initReq <- parseUrl "https://api.github.com/user"
-  let req = initReq { secure = True, method = "GET", requestHeaders = [("Authorization", C.pack("Bearer " ++ accessToken at)), ("User-Agent", "StarMe")] } -- Turn on https
+  let req = initReq { secure = True, method = "GET", requestHeaders = [("Authorization", C.pack("Bearer " ++ T.unpack (accessToken at))), ("User-Agent", "StarMe")] } -- Turn on https
   response <- withManager $ httpLbs req
   return $ addTokenToUser (decode (responseBody response)) (accessToken at)
 getUserInfo Nothing = return Nothing
 
-addTokenToUser :: Maybe User -> String -> Maybe User
+addTokenToUser :: Maybe User -> T.Text -> Maybe User
 addTokenToUser (Just user) token = Just user {token = token}
 addTokenToUser Nothing token = Nothing

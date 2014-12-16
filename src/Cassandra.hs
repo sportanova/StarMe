@@ -28,8 +28,19 @@ insertUser' (username, id, url, name, a_token, password) = executeWrite ONE q (u
 
 insertUser :: Pool -> Maybe M.User -> IO (Maybe M.User)
 insertUser pool (Just user) = (runCas pool $ insertUser' values) >> return (Just user)
-  where values = (T.pack (M.username user), M.id user, T.pack (M.url user), T.pack (M.name user), T.pack (M.token user), T.pack "")
+  where values = (M.username user, M.id user, M.url user, M.name user, M.token user, "")
 insertUser pool Nothing = return (Nothing)
+
+findUser' :: (MonadCassandra m) => T.Text -> m (Maybe (T.Text, Int, T.Text, T.Text, T.Text, T.Text))
+findUser' username = executeRow ONE q username
+  where q = "SELECT username, id, url, name, a_token, password FROM users WHERE username=?"
+
+findUser :: Pool -> T.Text -> IO (Maybe (M.User))
+findUser pool username = runCas pool $ (findUser' username) >>= (\x -> return $ convertToUser x)
+
+convertToUser :: Maybe (T.Text, Int, T.Text, T.Text, T.Text, T.Text) -> Maybe M.User
+convertToUser (Just (username, id, url, name, accessToken, password)) = Just user
+  where user = M.User {M.username = username, M.id = id, M.url = url, M.name = name, M.token = accessToken, M.password = password}
 
 createReposTable :: Query Schema () ()
 createReposTable = "CREATE TABLE IF NOT EXISTS repos (username text, name text, starred boolean, PRIMARY KEY(username, name, starred))"

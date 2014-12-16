@@ -20,16 +20,17 @@ instance ToJSON Repo where
     object ["rurl" .= name, "rname" .= url]
 
 data User = User {
-                   username :: String,
+                   username :: T.Text,
                    id :: Int,
-                   url :: String,
-                   name :: String,
-                   token :: String
+                   url :: T.Text,
+                   name :: T.Text,
+                   token :: T.Text,
+                   password :: T.Text
                  }
 
 instance ToJSON User where
-  toJSON (User username id url name token) =
-    object ["username" .= username, "id" .= id, "url" .= url, "name" .= name, "token" .= token]
+  toJSON (User username id url name token pw) =
+    object ["username" .= username, "id" .= id, "url" .= url, "name" .= name, "token" .= token, "password" .= pw]
 
 instance FromJSON User where
   parseJSON (Object v) = User <$>
@@ -37,12 +38,13 @@ instance FromJSON User where
                          v .: "id" <*>
                          v .: "url" <*>
                          v .: "name" <*>
-                         v .:? "token" .!= ""
+                         v .:? "token" .!= "" <*>
+                         v .:? "password" .!= ""
   parseJSON _ = mzero
 
-data AccessToken = AccessToken { accessToken :: String,
-                                 tokenType :: String,
-                                 scope :: String
+data AccessToken = AccessToken { accessToken :: T.Text,
+                                 tokenType :: T.Text,
+                                 scope :: T.Text
                                } deriving Show
 
 instance ToJSON AccessToken where

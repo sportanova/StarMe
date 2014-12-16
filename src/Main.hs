@@ -7,7 +7,7 @@ import Cassandra
 import Data.UUID
 import System.Random
 import Network.Wai.Middleware.Static
-
+import qualified Data.Text as T
 
 main = scotty 3000 $ do
   pool <- liftIO initCass
@@ -28,4 +28,7 @@ main = scotty 3000 $ do
     json r
   get "/repos" $ do
     r <- liftIO (getGHRepos "sportanova")
+    json r
+  get "/user" $ do
+    r <- liftIO (findUser pool $ T.pack "sportanova")
     json r
