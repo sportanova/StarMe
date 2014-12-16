@@ -27,5 +27,5 @@ main = scotty 3000 $ do
     r <- liftIO (starRepo "dinomiike" "pics" "1de5631b352399fdb00f705e9f222729814a0d7f")
     json r
   get "/repos" $ do
-    r <- liftIO (getRepos "sportanova")
+    r <- liftIO (getGHRepos "sportanova")
     json r
