@@ -7,6 +7,7 @@ var App = React.createClass({
     return (
       <div>
         <Repos repoType='public' username="sportanova"/>
+        <Repos repoType='selected' username="sportanova"/>
       </div>
     );
   }

@@ -18,7 +18,14 @@ var Repos = React.createClass({
       // })
     }
     else if(repoType === 'selected') {
+      var that = this;
 
+      $.ajax({
+        type: "GET",
+        url: "/repos/username/sportanova?starred=false"
+      }).then(function(data) {
+        console.log('data', data)
+      })
     }
   },
   componentDidMount: function() {

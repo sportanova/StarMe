@@ -26,9 +26,24 @@ main = scotty 3000 $ do
   get "/star" $ do
     r <- liftIO (starRepo "dinomiike" "pics" "1de5631b352399fdb00f705e9f222729814a0d7f")
     json r
+  post "/username/:username/repo/:repo" $ do
+    username <- param "username"
+    repo <- param "repo"
+    r <- liftIO $ insertRepo pool username repo False
+    json r
+  get "/repos/username/:username" $ do
+    username <- param "username"
+    starred' <- param "starred"
+    let starred = getBool starred'
+    r <- liftIO $ findRepos pool (username, starred)
+    json r
   get "/repos" $ do
     r <- liftIO (getGHRepos "sportanova")
     json r
   get "/user" $ do
     r <- liftIO (findUser pool $ T.pack "sportanova")
     json r
+
+getBool :: T.Text -> Bool
+getBool str = case str of "false" -> False
+                          "true" -> True

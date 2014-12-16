@@ -36,14 +36,14 @@ findUser' username = executeRow ONE q username
   where q = "SELECT username, id, url, name, a_token, password FROM users WHERE username=?"
 
 findUser :: Pool -> T.Text -> IO (Maybe (M.User))
-findUser pool username = runCas pool $ (findUser' username) >>= (\x -> return $ convertToUser x)
+findUser pool username = runCas pool $ (findUser' username) >>= (\user -> return $ convertToUser user)
 
 convertToUser :: Maybe (T.Text, Int, T.Text, T.Text, T.Text, T.Text) -> Maybe M.User
 convertToUser (Just (username, id, url, name, accessToken, password)) = Just user
   where user = M.User {M.username = username, M.id = id, M.url = url, M.name = name, M.token = accessToken, M.password = password}
 
 createReposTable :: Query Schema () ()
-createReposTable = "CREATE TABLE IF NOT EXISTS repos (username text, name text, starred boolean, PRIMARY KEY(username, name, starred))"
+createReposTable = "CREATE TABLE IF NOT EXISTS repos (username text, name text, starred boolean, PRIMARY KEY(username, starred, name))"
 
 insertRepo' :: (T.Text, T.Text, Bool) -> Cas ()
 insertRepo' (username, name, starred) = executeWrite ONE q (username, name, starred)
@@ -53,14 +53,15 @@ insertRepo :: Pool -> T.Text -> T.Text -> Bool -> IO ()
 insertRepo pool username name starred = (runCas pool $ insertRepo' values) >> return ()
   where values = (username, name, starred)
 
-findRepos' :: Query Rows (T.Text, T.Text, Bool) (T.Text, T.Text, Bool)
-findRepos' = "SELECT * FROM repos WHERE username=?, name=?, bool=?"
+findRepos' :: (MonadCassandra m) => (T.Text, Bool) -> m ([(T.Text, Bool, T.Text)])
+findRepos' tuple = executeRows ONE q tuple
+  where q = "SELECT username, starred, name FROM repos WHERE username=? AND starred=?"
 
-findRepos :: (MonadCassandra m) => (T.Text, T.Text, Bool) -> m ([(T.Text, T.Text, Bool)])
-findRepos (username, repoName, starred) = executeRows ONE findRepos' (username, repoName, starred)
+findRepos :: Pool -> (T.Text, Bool) -> IO ([M.Repo])
+findRepos pool tuple = runCas pool $ fmap (\tup -> map convertToRepo tup) (findRepos' tuple)
 
-
-
+convertToRepo :: (T.Text, Bool, T.Text) -> M.Repo
+convertToRepo (username, starred, name) = M.Repo {M.rusername = username, M.starred = starred, M.rname = name}
 
 
 

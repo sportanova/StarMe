@@ -7,17 +7,18 @@ import Data.Aeson
 import qualified Data.Text as T
 import Control.Applicative ((<$>), (<*>))
 
-data Repo = Repo {rname :: T.Text, rurl :: T.Text} deriving Show
+data Repo = Repo {rname :: T.Text, rusername :: T.Text, starred :: Bool} deriving Show
 
 instance FromJSON Repo where
   parseJSON (Object v) = Repo <$>
                          v .: "name" <*>
-                         v .: "url"
+                         v .:? "username" .!= "" <*>
+                         v .:? "starred" .!= False
   parseJSON _ = mzero
 
 instance ToJSON Repo where
-  toJSON (Repo name url) =
-    object ["rurl" .= name, "rname" .= url]
+  toJSON (Repo name username starred) =
+    object ["name" .= name, "username" .= username, "starred" .= starred]
 
 data User = User {
                    username :: T.Text,
