@@ -24,22 +24,57 @@ var Repos = React.createClass({
         type: "GET",
         url: "/repos/username/sportanova?starred=false"
       }).then(function(data) {
-        console.log('data', data)
+        that.setState({repos: data});
       })
     }
   },
+  removeRepo: function(index) {
+    var newRepos = this.state.repos.slice();
+    newRepos.splice(index, 1);
+
+    this.setState({repos: newRepos});
+  },
+  addRepo: function(repo) {
+    var newRepos = this.state.repos.slice();
+    newRepos.push(repo);
+
+    this.setState({repos: newRepos});
+  },
   componentDidMount: function() {
+    var that = this;
+
     this.getRepos(this.props.username, this.props.repoType)
+
+    if(this.props.repoType === 'public') {
+      document.body.addEventListener('addPublicRepo', function (e) {
+        that.addRepo(e.detail);
+      }, false);
+    }
+    else if(this.props.repoType === 'selected') {
+      document.body.addEventListener('addSelectedRepo', function (e) {
+        that.addRepo(e.detail);
+      }, false);
+    }
+  },
+  componentWillUnmount: function() {
+    document.body.removeEventListener('addPublicRepo', function (e) {
+      that.addRepo(e.detail);
+    }, false);
+
+    document.body.removeEventListener('addSelectedRepo', function (e) {
+      that.addRepo(e.detail);
+    }, false);
   },
   render: function() {
-    var repoNodes = this.state.repos.map(function(repo) {
+    var that = this;
+    var repoNodes = this.state.repos.map(function(repo, i) {
       return (
-        <Repo data={repo} key={Math.random()}/>
+        <Repo data={repo} repoType={that.props.repoType} removeRepo={that.removeRepo} key={Math.random()} index={i}/>
       )
     });
 
     return (
-      <div>
+      <div className='repos'>
         {repoNodes}
       </div>
     );
