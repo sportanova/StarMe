@@ -6,19 +6,18 @@ var App = React.createClass({
   render: function() {
     return (
       <div>
-        <Repos repoType='selected' username="sportanova"/>
-        <Repos repoType='public' username="sportanova"/>
+        <Repos repoType='selected' username={this.props.username}/>
+        <Repos repoType='public' username={this.props.username}/>
       </div>
     );
   }
 });
 
 function StarMe() {
-  this.appExists = false;
 }
 
 StarMe.prototype.init = function(domNode, attrs) {
-  this.react = React.render(<App/>, domNode);
+  this.react = React.render(<App username={attrs.username}/>, domNode);
   return this.react;
 };
 

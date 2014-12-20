@@ -8,6 +8,9 @@ import Data.UUID
 import System.Random
 import Network.Wai.Middleware.Static
 import qualified Data.Text as T
+import Models
+import Data.Maybe
+import qualified Data.Text.Lazy as B
 
 main = scotty 3000 $ do
   pool <- liftIO initCass
@@ -31,6 +34,11 @@ main = scotty 3000 $ do
     repo <- param "repo"
     r <- liftIO $ insertRepo pool username repo False
     json r
+  post "/repos/username/:username" $ do
+    b <- body
+    repos <- return $ fromMaybe [] (convertBodyToJSON b)
+    liftIO $ sequence (insertRepos pool repos)
+    html $ "[]"
   get "/repos/username/:username" $ do
     username <- param "username"
     starred' <- param "starred"
@@ -47,3 +55,6 @@ main = scotty 3000 $ do
 getBool :: T.Text -> Bool
 getBool str = case str of "false" -> False
                           "true" -> True
+
+printStuff :: T.Text -> IO()
+printStuff str = putStrLn $ T.unpack str

@@ -50,8 +50,14 @@ insertRepo' (username, name, starred) = executeWrite ONE q (username, name, star
   where q = "INSERT INTO repos (username, name, starred) values (?, ?, ?)"
 
 insertRepo :: Pool -> T.Text -> T.Text -> Bool -> IO ()
-insertRepo pool username name starred = (runCas pool $ insertRepo' values) >> return ()
+insertRepo pool username name starred = (runCas pool $ insertRepo' values)
   where values = (username, name, starred)
+
+insertRepos :: Pool -> [M.Repo] -> [IO ()]
+insertRepos pool repos = map (\repo -> insertRepo pool (M.rusername repo) (M.rname repo) False) repos
+
+convertToRepo :: (T.Text, Bool, T.Text) -> M.Repo
+convertToRepo (username, starred, name) = M.Repo {M.rusername = username, M.starred = starred, M.rname = name}
 
 findRepos' :: (MonadCassandra m) => (T.Text, Bool) -> m ([(T.Text, Bool, T.Text)])
 findRepos' tuple = executeRows ONE q tuple
@@ -59,10 +65,6 @@ findRepos' tuple = executeRows ONE q tuple
 
 findRepos :: Pool -> (T.Text, Bool) -> IO ([M.Repo])
 findRepos pool tuple = runCas pool $ fmap (\tup -> map convertToRepo tup) (findRepos' tuple)
-
-convertToRepo :: (T.Text, Bool, T.Text) -> M.Repo
-convertToRepo (username, starred, name) = M.Repo {M.rusername = username, M.starred = starred, M.rname = name}
-
 
 
 

@@ -22,7 +22,7 @@ var Repos = React.createClass({
 
       $.ajax({
         type: "GET",
-        url: "/repos/username/sportanova?starred=false"
+        url: "/repos/username/" + username + "?starred=false"
       }).then(function(data) {
         that.setState({repos: data});
       })
@@ -39,6 +39,26 @@ var Repos = React.createClass({
     newRepos.push(repo);
 
     this.setState({repos: newRepos});
+  },
+  saveRepos: function(repos) {
+    var that = this;
+
+    var reposToSave = _.filter(repos, function(repo) {
+      if(!repo.username) {
+        return true;
+      }
+    }).map(function(repo) {
+      return {
+        username: that.props.username,
+        name: repo.name
+      }
+    });
+
+    $.ajax({
+      type: "POST",
+      url: "/repos/username/" + this.props.username,
+      data: JSON.stringify(reposToSave)
+    })
   },
   componentDidMount: function() {
     var that = this;
@@ -76,6 +96,7 @@ var Repos = React.createClass({
     return (
       <div className='repos'>
         {repoNodes}
+        {this.props.repoType === 'selected' ? <button onClick={this.saveRepos.bind(this, this.state.repos)}>Save</button> : null}
       </div>
     );
   }

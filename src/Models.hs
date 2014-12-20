@@ -6,6 +6,7 @@ import Data.Aeson.Types
 import Data.Aeson
 import qualified Data.Text as T
 import Control.Applicative ((<$>), (<*>))
+import qualified Data.ByteString.Lazy as L
 
 data Repo = Repo {rname :: T.Text, rusername :: T.Text, starred :: Bool} deriving Show
 
@@ -28,6 +29,10 @@ data User = User {
                    token :: T.Text,
                    password :: T.Text
                  }
+
+convertBodyToJSON :: L.ByteString -> Maybe [Repo]
+convertBodyToJSON body = do
+  decode body
 
 instance ToJSON User where
   toJSON (User username id url name token pw) =
