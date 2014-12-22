@@ -24,6 +24,7 @@ executable starz
                      , HTTP
                      , http-conduit ==2.1.5
                      , network
+                     , amqp ==0.10.1
                      , scotty
                      , scotty-tls
                      , text
@@ -39,4 +40,5 @@ executable starz
   other-modules:       
                        Http.Github,
                        Cassandra,
-                       Models
+                       Models,
+                       RabbitMQ.Queue

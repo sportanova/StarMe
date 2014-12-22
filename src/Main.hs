@@ -10,11 +10,12 @@ import Network.Wai.Middleware.Static
 import qualified Data.Text as T
 import Models
 import Data.Maybe
-import qualified Data.Text.Lazy as B
+import RabbitMQ.Queue
 
 main = scotty 3000 $ do
   pool <- liftIO initCass
   middleware $ staticPolicy (noDots >-> addBase "static")
+  x <- liftIO initRabbit
 
   get "/" $ file "index.html"
   get "/wat" $ do

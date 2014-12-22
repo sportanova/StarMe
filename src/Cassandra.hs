@@ -65,9 +65,3 @@ findRepos' tuple = executeRows ONE q tuple
 
 findRepos :: Pool -> (T.Text, Bool) -> IO ([M.Repo])
 findRepos pool tuple = runCas pool $ fmap (\tup -> map convertToRepo tup) (findRepos' tuple)
-
-
-
-
-
-
