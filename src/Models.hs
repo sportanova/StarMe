@@ -8,6 +8,20 @@ import qualified Data.Text as T
 import Control.Applicative ((<$>), (<*>))
 import qualified Data.ByteString.Lazy as L
 
+data Event = Event {ename :: T.Text, ts :: Int, data1 :: T.Text, data2 :: T.Text} deriving Show
+
+instance FromJSON Event where
+  parseJSON (Object v) = Event <$>
+                         v .: "name" <*>
+                         v .: "ts" <*>
+                         v .: "data1" <*>
+                         v .: "data2"
+  parseJSON _ = mzero
+
+instance ToJSON Event where
+  toJSON (Event name ts data1 data2) =
+    object ["ename" .= name, "ts" .= ts, "data1" .= data1, "data2" .= data2]
+
 data Repo = Repo {rname :: T.Text, rusername :: T.Text, starred :: Bool} deriving Show
 
 instance FromJSON Repo where

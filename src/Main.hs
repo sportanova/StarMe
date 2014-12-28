@@ -8,16 +8,26 @@ import Data.UUID
 import System.Random
 import Network.Wai.Middleware.Static
 import qualified Data.Text as T
-import Models
+import qualified Models as M
 import Data.Maybe
 import RabbitMQ.Queue
 
 main = scotty 3000 $ do
   pool <- liftIO initCass
   middleware $ staticPolicy (noDots >-> addBase "static")
-  x <- liftIO initRabbit
+  rabbit <- liftIO initRabbit
 
   get "/" $ file "index.html"
+  post "/event" $ do
+    x <- liftIO $ insertEvent pool $ Just M.User {M.username = "username", M.id = 1, M.url = "url", M.name = "name", M.token = "accessToken", M.password = "password"}
+    json x
+  get "/event" $ do
+    r <- liftIO $ findEvents pool ("user", 0)
+    json r
+  get "/queue" $ do
+    word <- param "word"
+    liftIO $ pushMessage (snd rabbit) "myExchange" "myKey" word
+    html "wat"
   get "/wat" $ do
     html "NOW!"
   get "/auth_cb" $ do
@@ -37,7 +47,7 @@ main = scotty 3000 $ do
     json r
   post "/repos/username/:username" $ do
     b <- body
-    repos <- return $ fromMaybe [] (convertBodyToJSON b)
+    repos <- return $ fromMaybe [] (M.convertBodyToJSON b)
     liftIO $ sequence (insertRepos pool repos)
     html $ "[]"
   get "/repos/username/:username" $ do
@@ -50,12 +60,10 @@ main = scotty 3000 $ do
     r <- liftIO (getGHRepos "sportanova")
     json r
   get "/user" $ do
-    r <- liftIO (findUser pool $ T.pack "sportanova")
-    json r
+    u <- liftIO (findUser pool $ T.pack "sportanova")
+    liftIO $ insertEvent pool u
+    json u
 
 getBool :: T.Text -> Bool
 getBool str = case str of "false" -> False
                           "true" -> True
-
-printStuff :: T.Text -> IO()
-printStuff str = putStrLn $ T.unpack str
