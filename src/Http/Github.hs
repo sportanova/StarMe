@@ -19,13 +19,17 @@ import Data.Aeson
 -- https://github.com/login/oauth/authorize?scope=user,public_repo&client_id=99c89395ab6f347787e8
 
 -- PUT /user/starred/:owner/:repo
-starRepo :: String -> String -> String -> IO (String)
+starRepo :: T.Text -> T.Text -> T.Text -> IO (String)
 starRepo owner repo accessToken = do
-  initReq <- parseUrl "https://api.github.com/user/starred/dinomiike/pics?access_token=1de5631b352399fdb00f705e9f222729814a0d7f"
-  let req = initReq { secure = True, method = "PUT", requestHeaders = [("Accept", "application/vnd.github.v3+json"), ("User-Agent", "StarMe")] } -- Turn on https
+  initReq <- parseUrl $ "https://api.github.com/user/starred/" ++ T.unpack owner ++ "/" ++ T.unpack repo ++ "?access_token=" ++ T.unpack accessToken
+  let req = initReq { checkStatus = checkStatusFn, secure = True, method = "PUT", requestHeaders = [("Accept", "application/vnd.github.v3+json"), ("User-Agent", "StarMe")] } -- Turn on https
   response <- withManager $ httpLbs req
-  headers <- return (responseHeaders response) -- TODO: evaluate header for 204 success code
+  -- headers <- return (responseHeaders response) -- TODO: evaluate header for 204 success code
+  L.putStrLn $ responseBody response
   return ""
+
+checkStatusFn = 
+  \_ _ _ -> Nothing
 
 createRepoListURL :: String -> String
 createRepoListURL username = "https://api.github.com/users/" ++ username ++ "/repos?sort=updated"
