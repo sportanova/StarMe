@@ -12,7 +12,7 @@ var Repos = React.createClass({
 
       // $.ajax({
       //   type: "GET",
-      //   url: "https://api.github.com/users/" + username + "/repos?sort=updated"
+      //   url: "https://api.github.com/users/" + username + "/repos?sort=updated&per_page=100"
       // }).then(function(data) {
       //   that.setState({repos: data});
       // })
@@ -94,7 +94,7 @@ var Repos = React.createClass({
     });
 
     return (
-      <div className='repos'>
+      <div className='repos' style={this.props.showRepos}>
         {repoNodes}
         {this.props.repoType === 'selected' ? <button onClick={this.saveRepos.bind(this, this.state.repos)}>Save</button> : null}
       </div>
