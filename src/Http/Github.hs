@@ -18,6 +18,9 @@ import Data.Aeson
 
 -- https://github.com/login/oauth/authorize?scope=user,public_repo&client_id=99c89395ab6f347787e8
 
+checkStatusFn =
+  \_ _ _ -> Nothing
+
 -- PUT /user/starred/:owner/:repo
 starRepo :: T.Text -> T.Text -> T.Text -> IO (String)
 starRepo owner repo accessToken = do
@@ -27,9 +30,6 @@ starRepo owner repo accessToken = do
   -- headers <- return (responseHeaders response) -- TODO: evaluate header for 204 success code
   L.putStrLn $ responseBody response
   return ""
-
-checkStatusFn = 
-  \_ _ _ -> Nothing
 
 createRepoListURL :: String -> String
 createRepoListURL username = "https://api.github.com/users/" ++ username ++ "/repos?sort=updated"

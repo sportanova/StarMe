@@ -11,6 +11,7 @@ import qualified Data.Text as T
 import qualified Models as M
 import Data.Maybe
 import RabbitMQ.Queue
+import Auth
 
 main = scotty 3000 $ do
   pool <- liftIO initCass
@@ -18,6 +19,8 @@ main = scotty 3000 $ do
   rabbit <- liftIO initRabbit
 
   get "/" $ file "index.html"
+  get "/auth" $ auth (findUser pool) (param "username") (param "password") (html "hey") (html "Authenticate")
+  get "/ses" $ protected (findUser pool) (html "success") (html "Authenticate")
   post "/event" $ do
     x <- liftIO $ insertEvent pool $ Just M.User {M.username = "username", M.id = 1, M.url = "url", M.name = "name", M.token = "accessToken", M.password = "password"}
     json x
