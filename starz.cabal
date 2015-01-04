@@ -25,6 +25,7 @@ executable starz
                      , http-conduit ==2.1.5
                      , network
                      , amqp ==0.10.1
+                     , bcrypt ==0.0.5
                      , scotty
                      , scotty-tls
                      , text
@@ -41,4 +42,5 @@ executable starz
                        Http.Github,
                        Cassandra,
                        Models,
-                       RabbitMQ.Queue
+                       RabbitMQ.Queue,
+                       Auth

@@ -37,8 +37,6 @@ var App = React.createClass({
       'pure-menu-horizontal': true
     });
 
-    console.log('myReposShowHideStyle', myReposShowHideStyle)
-
     return (
       <div>
         <div className={menuClasses}>
