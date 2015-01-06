@@ -28,8 +28,9 @@ main = scotty 3000 $ do
     r <- liftIO $ findEvents pool ("user", 0)
     json r
   get "/queue" $ do
-    word <- param "word"
-    liftIO $ pushMessage (snd rabbit) "myExchange" "myKey" word
+    key <- param "key"
+    username <- param "username"
+    liftIO $ pushMessage (snd rabbit) "starRepos" (T.pack key) username
     html "wat"
   get "/wat" $ do
     html "NOW!"
@@ -55,9 +56,7 @@ main = scotty 3000 $ do
     html $ "[]"
   get "/repos/username/:username" $ do
     username <- param "username"
-    starred' <- param "starred"
-    let starred = getBool starred'
-    r <- liftIO $ findRepos pool (username, starred)
+    r <- liftIO $ findRepos1 pool username
     json r
   get "/repos" $ do
     r <- liftIO (getGHRepos "sportanova")
@@ -66,7 +65,3 @@ main = scotty 3000 $ do
     u <- liftIO (findUser pool $ T.pack "sportanova")
     liftIO $ insertEvent pool u
     json u
-
-getBool :: T.Text -> Bool
-getBool str = case str of "false" -> False
-                          "true" -> True

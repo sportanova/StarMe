@@ -1,14 +1,21 @@
 var Repos = React.createClass({
   getInitialState: function() {
     return {
-      repos: []
+      repos: [],
+      savedRepos: []
     }
   },
-  getRepos: function(username, repoType) {
-    if(repoType === 'public') {
-      var that = this;
+  getRepos: function(username) {
+    var that = this;
 
-      this.setState({repos: repoData});
+    $.ajax({
+      type: "GET",
+      url: "/repos/username/" + username
+    }).then(function(data) {
+      that.combineDataAndRepos(data, that.state.repos);
+    })
+
+    this.setState({repos: repoData});
 
       // $.ajax({
       //   type: "GET",
@@ -16,35 +23,29 @@ var Repos = React.createClass({
       // }).then(function(data) {
       //   that.setState({repos: data});
       // })
-    }
-    else if(repoType === 'selected') {
-      var that = this;
-
-      $.ajax({
-        type: "GET",
-        url: "/repos/username/" + username + "?starred=false"
-      }).then(function(data) {
-        that.setState({repos: data});
-      })
-    }
   },
-  removeRepo: function(index) {
-    var newRepos = this.state.repos.slice();
-    newRepos.splice(index, 1);
+  combineDataAndRepos: function(data, repos) {
+    if(data.length && repos.length) {
+      var data1 = _.reduce(data, function(acc, repo) {
+        acc[repo.name] = repo;
+        return acc;
+      }, {});
 
-    this.setState({repos: newRepos});
-  },
-  addRepo: function(repo) {
-    var newRepos = this.state.repos.slice();
-    newRepos.push(repo);
+      var repos1 = _.map(repos, function(repo) {
+        if(data1[repo.name]) {
+          return _.extend(repo, data1[repo.name])
+        }
+        else return repo;
+      });
 
-    this.setState({repos: newRepos});
+      this.setState({repos: repos1});
+    }
   },
   saveRepos: function(repos) {
     var that = this;
 
     var reposToSave = _.filter(repos, function(repo) {
-      if(!repo.username) {
+      if(!repo.hasOwnProperty('starred') && repo.isChecked) {
         return true;
       }
     }).map(function(repo) {
@@ -61,42 +62,42 @@ var Repos = React.createClass({
     })
   },
   componentDidMount: function() {
-    var that = this;
-
     this.getRepos(this.props.username, this.props.repoType)
+  },
+  repoIsChecked: function(repo) {
+    if(repo.hasOwnProperty('starred')) return true;
+    if(repo.isChecked) return true;
+  },
+  toggleCheckBox: function(repo) {
+    var that = this;
+    return function(isChecked) {
+      repo.isChecked = isChecked;
+      var repos1 = _.map(that.state.repos, function(repo1) {
+        if(repo1.name === repo.name) {
+          return repo;
+        }
+        else {
+          return repo1;
+        }
+      })
 
-    if(this.props.repoType === 'public') {
-      document.body.addEventListener('addPublicRepo', function (e) {
-        that.addRepo(e.detail);
-      }, false);
-    }
-    else if(this.props.repoType === 'selected') {
-      document.body.addEventListener('addSelectedRepo', function (e) {
-        that.addRepo(e.detail);
-      }, false);
+      that.setState({repos: repos1})
     }
   },
   componentWillUnmount: function() {
-    document.body.removeEventListener('addPublicRepo', function (e) {
-      that.addRepo(e.detail);
-    }, false);
-
-    document.body.removeEventListener('addSelectedRepo', function (e) {
-      that.addRepo(e.detail);
-    }, false);
   },
   render: function() {
     var that = this;
     var repoNodes = this.state.repos.map(function(repo, i) {
       return (
-        <Repo data={repo} repoType={that.props.repoType} removeRepo={that.removeRepo} key={Math.random()} index={i}/>
+        <Repo data={repo} key={Math.random()} isChecked={that.repoIsChecked(repo)} toggleCheckboxCB={that.toggleCheckBox(repo)} savedRepos={that.state.savedRepos} index={i}/>
       )
     });
 
     return (
-      <div className='repos' style={this.props.showRepos}>
+      <div className='repos'>
         {repoNodes}
-        {this.props.repoType === 'selected' ? <button onClick={this.saveRepos.bind(this, this.state.repos)}>Save</button> : null}
+        <button onClick={this.saveRepos.bind(this, this.state.repos)}>Save</button>
       </div>
     );
   }
