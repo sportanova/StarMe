@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings, DataKinds #-}
 import Web.Scotty
+import Web.Scotty.TLS
+import System.Environment 
 import Http.Github
+import System.IO.Unsafe
 import Control.Monad.IO.Class(liftIO)
 import Database.Cassandra.CQL
 import Cassandra
@@ -13,10 +16,15 @@ import Data.Maybe
 import RabbitMQ.Queue
 import Auth
 
+getEnvVar :: Int -> IO String
+getEnvVar index = getArgs >>= (\args -> return $ args !! index)
+
 main = scotty 3000 $ do
   pool <- liftIO initCass
   middleware $ staticPolicy (noDots >-> addBase "static")
   rabbit <- liftIO initRabbit
+  
+  liftIO $ putStrLn "starting up"
 
   get "/" $ file "index.html"
   get "/auth" $ auth (findUser pool) (param "username") (param "password") (html "hey") (html "Authenticate")

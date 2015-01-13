@@ -4,7 +4,6 @@ module Http.Github where
 import Web.Scotty
 import qualified Data.Text as T
 import Network.HTTP
-import Network.URI
 import Network.HTTP.Conduit
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Char8 as C
