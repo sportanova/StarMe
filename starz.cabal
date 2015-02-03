@@ -3,7 +3,7 @@ version:             0.0.1
 synopsis:            github starring app
 homepage:            https://github.com/yourName/repoName
 license:             MIT
-author:              Aditya Bhargava
+author:              sportanova
 maintainer:          you@email.com
 category:            Web
 build-type:          Simple
@@ -27,7 +27,6 @@ executable starz
                      , amqp ==0.10.1
                      , bcrypt ==0.0.5
                      , scotty
-                     , scotty-tls
                      , text
                      , aeson
                      , bytestring
@@ -36,9 +35,8 @@ executable starz
                      , wai-middleware-static
                      , wai-extra
                      , time
+                     , starme-shared
   other-modules:       
                        Http.Github,
-                       Cassandra,
-                       Models,
                        RabbitMQ.Queue,
                        Auth

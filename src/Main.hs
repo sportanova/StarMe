@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings, DataKinds #-}
 import Web.Scotty
-import Web.Scotty.TLS
 import System.Environment 
 import Http.Github
 import System.IO.Unsafe

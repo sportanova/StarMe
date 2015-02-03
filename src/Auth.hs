@@ -11,7 +11,7 @@ import Data.ByteString
 import Cassandra
 import Control.Monad.IO.Class (liftIO)
 
-type FindUserPartial = (T.Text -> IO (Maybe M.User))
+type FindUserPartial = T.Text -> IO (Maybe M.User)
 
 checkPw :: T.Text -> T.Text -> Bool
 checkPw hashedP plainP = validatePassword (encodeUtf8 hashedP) (encodeUtf8 plainP)
