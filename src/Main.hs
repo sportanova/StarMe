@@ -4,7 +4,6 @@ import System.Environment
 import Http.Github
 import System.IO.Unsafe
 import Control.Monad.IO.Class(liftIO)
-import Database.Cassandra.CQL
 import Cassandra
 import Data.UUID
 import System.Random

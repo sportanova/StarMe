@@ -12,7 +12,7 @@ cabal-version:       >=1.8
 executable starz
   main-is:             Main.hs
   -- other-modules:       
-  hs-source-dirs:      src
+  hs-source-dirs:      src, starme-shared
   build-depends:       base >=4.7.0.1
                      , wai
                      , warp

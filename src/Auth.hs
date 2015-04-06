@@ -44,18 +44,3 @@ checkToken findUser (Just at) (Just uname) = do
   case user of Just u -> if M.token u == LT.toStrict at then return True else return False
                Nothing -> return False
 checkToken _ _ _ = return False
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
